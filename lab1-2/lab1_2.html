@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pseudocode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200 w-full max-w-2xl">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">1.2 Pseudocode</h2>
+        
+        <div class="space-y-6">
+            
+            <div>
+                <h3 class="text-lg  text-black-600 mb-2">1. การคำนวณพื้นที่วงกลม</h3>
+                <pre class="bg-gray-800 text-green-400 p-4 rounded-lg overflow-x-auto text-sm"><code>// Pseudocode: การคำนวณพื้นที่วงกลม
+BEGIN
+    INPUT radius
+    SET PI = 3.14159
+    SET area = PI * radius * radius
+    OUTPUT "Area of the circle is: " + area
+END</code></pre>
+            </div>
+            <div>
+                <h3 class="text-lg  text-black-600 mb-2">2. การคำนวณเกรด (A/B/C/D/F)</h3>
+                <pre class="bg-gray-800 text-green-400 p-4 rounded-lg overflow-x-auto text-sm"><code>// Pseudocode: การคำนวณเกรด
+BEGIN
+    INPUT score
+    IF score >= 80 THEN
+        OUTPUT "Grade: A"
+    ELSE IF score >= 70 THEN
+        OUTPUT "Grade: B"
+    ELSE IF score >= 60 THEN
+        OUTPUT "Grade: C"
+    ELSE IF score >= 50 THEN
+        OUTPUT "Grade: D"
+    ELSE
+        OUTPUT "Grade: F"
+    END IF
+END</code></pre>
+            </div>
+            <div>
+                <h3 class="text-lg  text-black-600 mb-2">3. การหาค่าสูงสุดใน 3 จำนวน</h3>
+                <pre class="bg-gray-800 text-green-400 p-4 rounded-lg overflow-x-auto text-sm"><code>// Pseudocode: หาค่าสูงสุดใน 3 จำนวน
+BEGIN
+    INPUT num1, num2, num3
+    SET max = num1
+
+    IF num2 > max THEN
+        SET max = num2
+    END IF
+
+    IF num3 > max THEN
+        SET max = num3
+    END IF
+
+    OUTPUT "Maximum value is: " + max
+END</code></pre>
+            </div>
+        </div>
+    </div>
+    </body>
+</html>

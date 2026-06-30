@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การสร้างตารางผ่อนชำระด้วย loop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4 text-center">ระบบคำนวณสินเชื่อและตารางผ่อนชำระ</h2>
+            
+            <form onsubmit="event.preventDefault(); generateAmortizationTable();" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="loanAmount" class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงินกู้ (บาท)</label>
+                    <input type="number" id="loanAmount" required min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น 100000">
+                </div>
+                <div>
+                    <label for="interestRate" class="block text-sm font-medium text-gray-700 mb-1">อัตราดอกเบี้ย (% ต่อปี)</label>
+                    <input type="number" id="interestRate" required step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น 5.5">
+                </div>
+                <div>
+                    <label for="months" class="block text-sm font-medium text-gray-700 mb-1">ระยะเวลา (เดือน)</label>
+                    <input type="number" id="months" required min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น 24">
+                </div>
+                <div class="md:col-span-3 mt-2">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md">
+                        สร้างตารางผ่อนชำระ
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="resultContainer" class="bg-white p-8 rounded-xl shadow-md border border-gray-200 hidden">
+            
+            <div id="summary" class="bg-blue-50 p-6 rounded-lg border border-blue-100 mb-6 text-gray-800 text-lg space-y-2">
+                </div>
+
+            <h4 class="text-lg font-bold text-gray-800 mb-3">รายละเอียดการผ่อนชำระรายเดือน</h4>
+            <div class="overflow-x-auto max-h-96 rounded-lg border border-gray-200 shadow-inner">
+                <table class="w-full text-sm text-right text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0 shadow-sm">
+                        <tr>
+                            <th class="px-4 py-3 text-center">งวดที่</th>
+                            <th class="px-4 py-3">ค่างวด</th>
+                            <th class="px-4 py-3 text-red-600">ดอกเบี้ย</th>
+                            <th class="px-4 py-3 text-green-600">เงินต้น</th>
+                            <th class="px-4 py-3">คงเหลือ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="amortizationTable">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function generateAmortizationTable() {
+            let loanAmount = parseFloat(document.getElementById("loanAmount").value);
+            let interestRate = parseFloat(document.getElementById("interestRate").value) / 100 / 12;
+            let months = parseInt(document.getElementById("months").value);
+
+            let monthlyPayment = (loanAmount * interestRate * Math.pow(1 + interestRate, months)) / (Math.pow(1 + interestRate, months) - 1);
+            
+
+            if (isNaN(monthlyPayment) || !isFinite(monthlyPayment)) {
+                monthlyPayment = loanAmount / months;
+            }
+
+            let tableHtml = "";
+            let remaining = loanAmount;
+            let totalInterest = 0;
+
+            for (let i = 1; i <= months; i++) {
+                let interest = remaining * interestRate;
+                let principal = monthlyPayment - interest;
+                remaining -= principal;
+                totalInterest += interest;
+
+                let rowBg = i % 2 === 0 ? "bg-gray-50" : "bg-white";
+                tableHtml += `<tr class="${rowBg} border-b hover:bg-blue-50">
+                    <td class="px-4 py-2 text-center">${i}</td>
+                    <td class="px-4 py-2 font-semibold text-blue-600">${monthlyPayment.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-red-500">${interest.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-green-600">${principal.toFixed(2)}</td>
+                    <td class="px-4 py-2 font-bold">${Math.max(0, remaining).toFixed(2)}</td>
+                </tr>`;
+            }
+
+
+            document.getElementById("resultContainer").classList.remove("hidden");
+            document.getElementById("amortizationTable").innerHTML = tableHtml;
+            document.getElementById("summary").innerHTML = `
+                <p><span class="font-semibold">ค่างวดต่อเดือน:</span> ${monthlyPayment.toFixed(2)} บาท</p>
+                <p><span class="font-semibold">รวมเงินที่ต้องชำระ:</span> ${(monthlyPayment * months).toFixed(2)} บาท</p>
+                <p><span class="font-semibold text-red-500">ดอกเบี้ยรวม:</span> <span class="text-red-500">${totalInterest.toFixed(2)} บาท</span></p>
+            `;
+        }
+    </script>
+</body>
+</html>

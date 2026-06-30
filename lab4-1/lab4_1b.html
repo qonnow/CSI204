@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การจัดการ localStorage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body id="pageBody" class="bg-gray-100 text-gray-900 min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300">
+
+    <div id="card" class="bg-white p-8 rounded-xl shadow-md border w-full max-w-md transition-colors duration-300">
+        <h2 class="text-2xl font-bold text-center mb-6 border-b pb-2">ข้อมูลของคุณ</h2>
+        
+        <div id="displayArea" class="space-y-4 mb-6">
+            <p class="text-center text-red-500 italic">ไม่พบข้อมูลในระบบ กรุณากลับไปกรอกข้อมูลก่อน</p>
+        </div>
+
+        <div class="flex flex-col space-y-3">
+            <button onclick="toggleTheme()" class="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg transition">
+                สลับ Theme (Light/Dark)
+            </button>
+
+            <button onclick="clearData()" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition">
+                ล้างข้อมูลใน localStorage
+            </button>
+            
+            <a href="lab4_1b.html" onclick="location.reload()" class="text-center text-sm text-gray-500 hover:underline">รีเฟรชหน้าเว็บ</a>
+        </div>
+    </div>
+
+    <div class="mt-6 text-center">
+        <a href="lab4_1a.html" class="text-blue-500 hover:underline">&larr; กลับไปหน้าฟอร์ม</a>
+    </div>
+
+    <script>
+
+        function loadData() {
+            const savedData = localStorage.getItem('userProfile');
+            
+            if (savedData) {
+                const userProfile = JSON.parse(savedData);
+
+                document.getElementById('displayArea').innerHTML = `
+                    <p><span class="font-bold">ชื่อ:</span> ${userProfile.name}</p>
+                    <p><span class="font-bold">อีเมล:</span> ${userProfile.email}</p>
+                    <p><span class="font-bold">เบอร์โทร:</span> ${userProfile.phone}</p>
+                    <p><span class="font-bold">Theme ที่บันทึกไว้:</span> ${userProfile.theme}</p>
+                `;
+                applyTheme(userProfile.theme);
+            }
+        }
+
+        // ฟังก์ชันปรับเปลี่ยน Theme สี
+        function applyTheme(theme) {
+            const body = document.getElementById('pageBody');
+            const card = document.getElementById('card');
+            
+            if (theme === 'dark') {
+                body.className = "bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300";
+                card.className = "bg-gray-800 border-gray-700 p-8 rounded-xl shadow-md border w-full max-w-md transition-colors duration-300";
+            } else {
+                body.className = "bg-gray-100 text-gray-900 min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300";
+                card.className = "bg-white p-8 rounded-xl shadow-md border w-full max-w-md transition-colors duration-300";
+            }
+        }
+
+        function toggleTheme() {
+            let savedData = localStorage.getItem('userProfile');
+            if (savedData) {
+                let userProfile = JSON.parse(savedData);
+                userProfile.theme = userProfile.theme === 'light' ? 'dark' : 'light';
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                loadData(); 
+            } else {
+                alert('กรุณาบันทึกข้อมูลในหน้าฟอร์มก่อนใช้งานฟังก์ชันนี้');
+            }
+        }
+
+        function clearData() {
+            if(confirm("ยืนยันการล้างข้อมูลทั้งหมด?")) {
+                localStorage.removeItem('userProfile');
+                alert("ล้างข้อมูลเรียบร้อยแล้ว");
+                location.reload(); 
+            }
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>

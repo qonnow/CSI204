@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคำนวณสินเชื่อบ้านแบบลดต้นลดดอก (Mortgage Calculator)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+     
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen py-10 px-4 font-sans">
+
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-extrabold text-slate-800">ระบบคำนวณสินเชื่อบ้าน</h2>
+                <p class="text-slate-500 mt-2">คำนวณค่างวดแบบลดต้นลดดอก (Effective Rate)</p>
+            </div>
+            
+            <form id="loanForm" onsubmit="event.preventDefault(); calculateMortgage();" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div>
+                    <label for="homePrice" class="block text-sm font-semibold text-slate-700 mb-1">ราคาบ้าน (บาท)</label>
+                    <input type="number" id="homePrice" required min="1" oninput="autoCalcLoanAmount()" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition" placeholder="เช่น 3000000">
+                </div>
+
+                <div>
+                    <label for="downPayment" class="block text-sm font-semibold text-slate-700 mb-1">เงินดาวน์ (บาท)</label>
+                    <input type="number" id="downPayment" required min="0" oninput="autoCalcLoanAmount()" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition" placeholder="เช่น 300000">
+                </div>
+
+                <div class="md:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <label for="loanAmount" class="block text-sm font-semibold text-slate-700 mb-1">วงเงินกู้สุทธิ (บาท) - <span class="text-xs text-blue-500 font-normal">คำนวณอัตโนมัติ</span></label>
+                    <input type="number" id="loanAmount" readonly class="w-full px-4 py-2 bg-transparent text-xl font-bold text-blue-700 outline-none cursor-not-allowed" value="0">
+                </div>
+
+                <div>
+                    <label for="interestRate" class="block text-sm font-semibold text-slate-700 mb-1">อัตราดอกเบี้ย (% ต่อปี)</label>
+                    <input type="number" id="interestRate" required step="0.01" min="0.1" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition" placeholder="เช่น 5.0">
+                </div>
+
+                <div>
+                    <label for="loanYears" class="block text-sm font-semibold text-slate-700 mb-1">ระยะเวลาผ่อนชำระ (ปี)</label>
+                    <select id="loanYears" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition bg-white">
+                        <option value="10">10 ปี (120 งวด)</option>
+                        <option value="15">15 ปี (180 งวด)</option>
+                        <option value="20">20 ปี (240 งวด)</option>
+                        <option value="25">25 ปี (300 งวด)</option>
+                        <option value="30" selected>30 ปี (360 งวด)</option>
+                        <option value="35">35 ปี (420 งวด)</option>
+                        <option value="40">40 ปี (480 งวด)</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2 mt-4">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition duration-200 shadow-md text-lg">
+                        คำนวณค่างวด
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="resultSection" class="hidden space-y-8 animate-fade-in">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
+                    <p class="text-sm font-medium text-slate-500 mb-1">ค่างวดต่อเดือน</p>
+                    <p id="resMonthlyPayment" class="text-2xl font-bold text-slate-800">0.00</p>
+                    <p class="text-xs text-slate-400 mt-1">จำนวน <span id="resTotalMonths">0</span> งวด</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-500">
+                    <p class="text-sm font-medium text-slate-500 mb-1">วงเงินกู้สุทธิ</p>
+                    <p id="resLoanAmount" class="text-2xl font-bold text-slate-800">0.00</p>
+                    <p class="text-xs text-slate-400 mt-1">บาท</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-red-500">
+                    <p class="text-sm font-medium text-slate-500 mb-1">ดอกเบี้ยรวมทั้งสัญญา</p>
+                    <p id="resTotalInterest" class="text-2xl font-bold text-red-600">0.00</p>
+                    <p class="text-xs text-slate-400 mt-1">บาท</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
+                    <p class="text-sm font-medium text-slate-500 mb-1">ยอดชำระรวมทั้งหมด</p>
+                    <p id="resTotalPaid" class="text-2xl font-bold text-emerald-600">0.00</p>
+                    <p class="text-xs text-slate-400 mt-1">เงินต้น + ดอกเบี้ย</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-4">ตารางผ่อนชำระ (Amortization Table)</h3>
+                <div class="overflow-x-auto max-h-[500px] rounded-xl border border-slate-200 shadow-inner">
+                    <table class="w-full text-sm text-right text-slate-600">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100 sticky top-0 shadow-sm z-10">
+                            <tr>
+                                <th class="px-6 py-4 text-center">งวดที่</th>
+                                <th class="px-6 py-4">ยอดชำระ</th>
+                                <th class="px-6 py-4 text-emerald-600">เงินต้น (ลดต้น)</th>
+                                <th class="px-6 py-4 text-red-500">ดอกเบี้ย</th>
+                                <th class="px-6 py-4 font-bold">ยอดคงเหลือ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="amortizationTableBody">
+                            </tbody>
+                    </table>
+                </div>
+                <p class="text-xs text-slate-400 mt-4 text-center">* หมายเหตุ: ค่างวดเดือนสุดท้ายอาจมีการปรับเศษสตางค์เพื่อให้ยอดคงเหลือเป็น 0 </p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        
+        const formatMoney = (amount) => {
+            return amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
+        function autoCalcLoanAmount() {
+            let price = parseFloat(document.getElementById('homePrice').value) || 0;
+            let down = parseFloat(document.getElementById('downPayment').value) || 0;
+            let loanAmount = price - down;
+            document.getElementById('loanAmount').value = loanAmount > 0 ? loanAmount : 0;
+        }
+
+        function calculateMortgage() {
+            let homePrice = parseFloat(document.getElementById('homePrice').value);
+            let downPayment = parseFloat(document.getElementById('downPayment').value);
+            let loanAmount = homePrice - downPayment;
+            
+            // Validation: ตรวจสอบความถูกต้องของข้อมูลนำเข้า
+            if (loanAmount <= 0) {
+                alert("เงินดาวน์ต้องน้อยกว่าราคาบ้านครับ วงเงินกู้ถึงจะถูกต้อง");
+                return;
+            }
+
+            let annualInterestRate = parseFloat(document.getElementById('interestRate').value);
+            let monthlyInterestRate = annualInterestRate / 100 / 12; // แปลงดอกเบี้ยต่อปี เป็นต่อเดือน
+            let years = parseInt(document.getElementById('loanYears').value);
+            let totalMonths = years * 12;
+
+            // คำนวณค่างวดต่อเดือน ด้วยสูตร PMT (ลดต้นลดดอก)
+            let monthlyPayment = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, totalMonths)) / (Math.pow(1 + monthlyInterestRate, totalMonths) - 1);
+            let balance = loanAmount;
+            let totalInterest = 0;
+            let tableHtml = "";
+
+
+            for (let month = 1; month <= totalMonths; month++) {
+                // คำนวณดอกเบี้ยของงวดปัจจุบัน
+                let interestPayment = balance * monthlyInterestRate;
+                
+                // คำนวณเงินต้นที่ถูกตัดในงวดนี้
+                let principalPayment = monthlyPayment - interestPayment;
+                    if (month === totalMonths) {
+                    principalPayment = balance;
+                    monthlyPayment = principalPayment + interestPayment;
+                }
+
+
+                balance -= principalPayment;
+                if (balance < 0.01) balance = 0; // เคลียร์เศษสตางค์ให้เป็น 0
+                totalInterest += interestPayment;
+
+                let rowBg = month % 2 === 0 ? "bg-slate-50" : "bg-white";
+                
+                tableHtml += `
+                    <tr class="${rowBg} border-b hover:bg-blue-50 transition-colors">
+                        <td class="px-6 py-3 text-center font-medium">${month}</td>
+                        <td class="px-6 py-3 font-semibold text-slate-700">${formatMoney(monthlyPayment)}</td>
+                        <td class="px-6 py-3 text-emerald-600">${formatMoney(principalPayment)}</td>
+                        <td class="px-6 py-3 text-red-500">${formatMoney(interestPayment)}</td>
+                        <td class="px-6 py-3 font-bold text-slate-800">${formatMoney(balance)}</td>
+                    </tr>
+                `;
+            }
+
+            let totalPaid = loanAmount + totalInterest;
+            document.getElementById('resMonthlyPayment').innerText = formatMoney(monthlyPayment);
+            document.getElementById('resTotalMonths').innerText = totalMonths;
+            document.getElementById('resLoanAmount').innerText = formatMoney(loanAmount);
+            document.getElementById('resTotalInterest').innerText = formatMoney(totalInterest);
+            document.getElementById('resTotalPaid').innerText = formatMoney(totalPaid);
+            document.getElementById('amortizationTableBody').innerHTML = tableHtml;
+            document.getElementById('resultSection').classList.remove('hidden');
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+</body>
+</html>

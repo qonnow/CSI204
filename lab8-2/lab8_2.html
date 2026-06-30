@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การคำนวณ/ภาษีมูลค่าเพิ่มและส่วนลดในตาราง</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background-color: #f3f4f6; font-weight: 600; color: #374151; }
+        .summary-row td { text-align: right; font-weight: 600; }
+        .summary-value { color: #2563eb; }
+        .discount-value { color: #ef4444; }
+        .net-value { color: #16a34a; font-size: 1.1rem; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+
+    <div class="max-w-4xl mx-auto space-y-8">
+        <h2 class="text-3xl font-bold text-gray-800 text-center">ระบบคำนวณการขายสินค้า (Lab 8.2)</h2>
+
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+            <h3 class="text-xl font-bold text-blue-700 mb-4">1. สร้างตารางด้วย For Loop</h3>
+            <div class="overflow-x-auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ชื่อสินค้า</th>
+                            <th>ราคา/หน่วย (บาท)</th>
+                            <th>จำนวน</th>
+                            <th>รวม (บาท)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableForLoop"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+            <h3 class="text-xl font-bold text-purple-700 mb-4">2. สร้างตารางด้วย While Loop</h3>
+            <div class="overflow-x-auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ชื่อสินค้า</th>
+                            <th>ราคา/หน่วย (บาท)</th>
+                            <th>จำนวน</th>
+                            <th>รวม (บาท)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableWhileLoop"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+            <h3 class="text-xl font-bold text-green-700 mb-4">3. สร้างตารางด้วย Do-While Loop</h3>
+            <div class="overflow-x-auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ชื่อสินค้า</th>
+                            <th>ราคา/หน่วย (บาท)</th>
+                            <th>จำนวน</th>
+                            <th>รวม (บาท)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableDoWhileLoop"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        const products = [
+            { name: "Keyboard", price: 1200, qty: 2 },
+            { name: "Mouse", price: 500, qty: 3 },
+            { name: "Monitor", price: 4500, qty: 1 },
+            { name: "Speaker", price: 1500, qty: 1 },
+            { name: "Headphones", price: 800, qty: 2 }
+        ];
+
+        // ฟังก์ชันสำหรับคำนวณสรุปผล (ราคารวม, ส่วนลด, VAT, ยอดสุทธิ)
+        function generateSummaryRows(total) {
+            let discount = 0;
+            
+
+            if (total >= 10000) {
+                discount = total * 0.10; // ลด 10%
+            } else if (total >= 5000) {
+                discount = total * 0.05; // ลด 5%
+            }
+
+            let afterDiscount = total - discount;
+            let vat = afterDiscount * 0.07; // คำนวณ VAT 7% จากยอดหลังหักส่วนลด
+            let netTotal = afterDiscount + vat;
+
+
+            return `
+                <tr class="summary-row bg-gray-50">
+                    <td colspan="3">ราคารวม (ก่อนหักส่วนลด)</td>
+                    <td class="summary-value">${total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                </tr>
+                <tr class="summary-row bg-red-50">
+                    <td colspan="3">ส่วนลดที่ได้รับ</td>
+                    <td class="discount-value">- ${discount.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                </tr>
+                <tr class="summary-row bg-gray-50">
+                    <td colspan="3">ภาษีมูลค่าเพิ่ม (VAT 7%)</td>
+                    <td class="summary-value">${vat.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                </tr>
+                <tr class="summary-row bg-green-50">
+                    <td colspan="3">ยอดสุทธิที่ต้องชำระ</td>
+                    <td class="net-value">${netTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                </tr>
+            `;
+        }
+
+        function renderWithForLoop() {
+            let html = "";
+            let total = 0;
+            
+            for (let i = 0; i < products.length; i++) {
+                let item = products[i];
+                let itemTotal = item.price * item.qty;
+                total += itemTotal;
+                
+                html += `<tr>
+                    <td>${item.name}</td>
+                    <td>${item.price.toLocaleString()}</td>
+                    <td>${item.qty}</td>
+                    <td>${itemTotal.toLocaleString()}</td>
+                </tr>`;
+            }
+            
+            html += generateSummaryRows(total);
+            document.getElementById("tableForLoop").innerHTML = html;
+        }
+
+
+        function renderWithWhileLoop() {
+            let html = "";
+            let total = 0;
+            let i = 0; // กำหนดค่าเริ่มต้น
+            
+            while (i < products.length) {
+                let item = products[i];
+                let itemTotal = item.price * item.qty;
+                total += itemTotal;
+                
+                html += `<tr>
+                    <td>${item.name}</td>
+                    <td>${item.price.toLocaleString()}</td>
+                    <td>${item.qty}</td>
+                    <td>${itemTotal.toLocaleString()}</td>
+                </tr>`;
+                
+                i++; 
+            }
+            
+            html += generateSummaryRows(total);
+            document.getElementById("tableWhileLoop").innerHTML = html;
+        }
+
+        function renderWithDoWhileLoop() {
+            let html = "";
+            let total = 0;
+            let i = 0;
+            
+            if (products.length > 0) { // กัน Error กรณี Array ว่าง
+                do {
+                    let item = products[i];
+                    let itemTotal = item.price * item.qty;
+                    total += itemTotal;
+                    
+                    html += `<tr>
+                        <td>${item.name}</td>
+                        <td>${item.price.toLocaleString()}</td>
+                        <td>${item.qty}</td>
+                        <td>${itemTotal.toLocaleString()}</td>
+                    </tr>`;
+                    
+                    i++;
+                } while (i < products.length);
+            }
+            
+            html += generateSummaryRows(total);
+            document.getElementById("tableDoWhileLoop").innerHTML = html;
+        }
+
+        window.onload = function() {
+            renderWithForLoop();
+            renderWithWhileLoop();
+            renderWithDoWhileLoop();
+        };
+    </script>
+</body>
+</html>

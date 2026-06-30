@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การสร้างและจัดการ Array/Object</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+
+    <div class="max-w-3xl mx-auto space-y-6">
+        
+        <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4 text-center">ระบบจัดการข้อมูลนักเรียน</h2>
+            
+            <div class="overflow-x-auto mb-6 rounded-lg border border-gray-200">
+                <div id="studentTable">
+                    </div>
+            </div>
+
+            <div class="bg-green-50 p-4 rounded-lg border border-green-200 shadow-sm">
+                <div id="gradeA" class="text-lg">
+                    </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        const students = [
+            { id: 1, name: "ขันแดง จานดี", scores: [85, 90, 88], grade: "A" },
+            { id: 2, name: "ขันเขียว จานดำ", scores: [75, 80, 78], grade: "B" },
+            { id: 3, name: "ขันฟ้า จานลาย", scores: [95, 92, 94], grade: "A" },
+            { id: 4, name: "ขันขาว จานเดียว", scores: [65, 70, 68], grade: "C" }
+        ];
+
+        function displayStudents() {
+
+            let tableHtml = `
+                <table class="w-full text-left text-gray-600 border-collapse">
+                    <thead class="bg-gray-100 text-gray-700">
+                        <tr>
+                            <th class="py-3 px-4 border-b">ID</th>
+                            <th class="py-3 px-4 border-b">ชื่อ - นามสกุล</th>
+                            <th class="py-3 px-4 border-b text-center">คะแนนเฉลี่ย</th>
+                            <th class="py-3 px-4 border-b text-center">เกรด</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            tableHtml += students.map(student => {
+
+                let avgScore = student.scores.reduce((a, b) => a + b, 0) / student.scores.length;
+                
+                return `
+                    <tr class="border-b hover:bg-blue-50 transition">
+                        <td class="py-3 px-4">${student.id}</td>
+                        <td class="py-3 px-4 font-medium text-gray-800">${student.name}</td>
+                        <td class="py-3 px-4 text-center">${avgScore.toFixed(2)}</td>
+                        <td class="py-3 px-4 text-center font-bold text-blue-600">${student.grade}</td>
+                    </tr>
+                `;
+            }).join(''); 
+
+            tableHtml += `</tbody></table>`;
+
+            document.getElementById("studentTable").innerHTML = tableHtml;
+
+
+            let gradeA = students.filter(s => s.grade === "A");
+            document.getElementById("gradeA").innerHTML = `
+                <span class="font-semibold text-gray-800">นักเรียนที่ได้เกรด A ได้แก่: </span>
+                <span class="font-bold text-green-600 ml-2">${gradeA.map(s => s.name).join(", ")}</span>
+            `;
+        }
+
+            window.onload = displayStudents;
+    </script>
+</body>
+</html>

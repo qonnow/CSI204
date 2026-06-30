@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การจัดการข้อมูลด้วย sessionStorage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen py-10 px-4">
+
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">ตะกร้าสินค้าของคุณ</h2>
+            
+            <div class="overflow-x-auto mb-6">
+                <table class="w-full text-left text-gray-600">
+                    <thead class="border-b bg-gray-50">
+                        <tr>
+                            <th class="py-3 px-4">ลำดับ</th>
+                            <th class="py-3 px-4">ชื่อสินค้า</th>
+                            <th class="py-3 px-4 text-right">ราคา (บาท)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cartItems">
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-between items-center py-4 border-t-2 border-gray-800 text-xl mb-6">
+                <span class="font-bold text-gray-800">ราคารวมทั้งสิ้น:</span>
+                <span id="totalPrice" class="font-bold text-blue-600">0 บาท</span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="lab4_2a.html" class="text-center w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition">
+                    &larr; กลับไปเลือกสินค้าเพิ่ม
+                </a>
+                <button onclick="clearCart()" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition">
+                    ล้างตะกร้าสินค้า
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loadCart() {
+            let cart = JSON.parse(sessionStorage.getItem('shoppingCart')) || [];
+            let cartItemsHTML = "";
+            let totalPrice = 0;
+
+            if (cart.length === 0) {
+                cartItemsHTML = `<tr><td colspan="3" class="py-8 text-center text-red-500 italic">ไม่มีสินค้าในตะกร้า</td></tr>`;
+            } else {
+  
+                cart.forEach((item, index) => {
+                    cartItemsHTML += `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4">${index + 1}</td>
+                            <td class="py-3 px-4">${item.name}</td>
+                            <td class="py-3 px-4 text-right">${item.price.toLocaleString()}</td>
+                        </tr>
+                    `;
+                    totalPrice += item.price; 
+                });
+            }
+
+
+            document.getElementById('cartItems').innerHTML = cartItemsHTML;
+            document.getElementById('totalPrice').innerText = `${totalPrice.toLocaleString()} บาท`;
+        }
+
+        function clearCart() {
+            if(confirm("คุณต้องการล้างสินค้าทั้งหมดในตะกร้าใช่หรือไม่?")) {
+                sessionStorage.removeItem('shoppingCart');
+                loadCart(); 
+            }
+        }
+
+        // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+        window.onload = loadCart;
+    </script>
+</body>
+</html>

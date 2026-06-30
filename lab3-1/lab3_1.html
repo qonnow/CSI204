@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฟอร์มสินเชื่อคำนวณบ้าน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4 text-center">คำนวณสินเชื่อบ้าน</h2>
+            
+            <form onsubmit="event.preventDefault(); calculateLoan();" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="salary" class="block text-sm font-medium text-gray-700 mb-1">เงินเดือน (บาท)</label>
+                    <input type="number" id="salary" required min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น 30000">
+                </div>
+
+                <div>
+                    <label for="loanAmount" class="block text-sm font-medium text-gray-700 mb-1">วงเงินที่ต้องการกู้ (บาท)</label>
+                    <input type="number" id="loanAmount" required min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น 2000000">
+                </div>
+
+                <div>
+                    <label for="interestRate" class="block text-sm font-medium text-gray-700 mb-1">อัตราดอกเบี้ย (% ต่อปี)</label>
+                    <input type="number" id="interestRate" required step="0.01" min="0" value="3.50" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label for="years" class="block text-sm font-medium text-gray-700 mb-1">ระยะเวลากู้ (ปี)</label>
+                    <input type="number" id="years" required min="1" max="40" value="30" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <div class="md:col-span-2 mt-2">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md">
+                        submit
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="resultContainer" class="bg-white p-8 rounded-xl shadow-md border border-gray-200 hidden">
+            <div id="summaryResult" class="text-gray-700 text-lg space-y-2 mb-8 bg-blue-50 p-6 rounded-lg border border-blue-100">
+                </div>
+
+            <h4 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">ตารางผ่อนชำระ (Amortization Schedule)</h4>
+            <div class="overflow-x-auto max-h-96 rounded-lg border border-gray-200 shadow-inner">
+                <table class="w-full text-sm text-right text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0 shadow-sm">
+                        <tr>
+                            <th class="px-4 py-3 text-center">งวดที่</th>
+                            <th class="px-4 py-3">เงินต้นยกมา</th>
+                            <th class="px-4 py-3">ยอดชำระ</th>
+                            <th class="px-4 py-3">ดอกเบี้ย</th>
+                            <th class="px-4 py-3">ตัดเงินต้น</th>
+                            <th class="px-4 py-3">เงินต้นคงเหลือ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableResult">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function calculateLoan() {
+            let monthlySalary = parseFloat(document.getElementById("salary").value);
+            let loanAmount = parseFloat(document.getElementById("loanAmount").value);
+            let annualInterestRate = parseFloat(document.getElementById("interestRate").value);
+            let interestRate = annualInterestRate / 100 / 12; // แปลงเป็นดอกเบี้ยต่อเดือน
+            let years = parseInt(document.getElementById("years").value);
+            let months = years * 12;
+            let maxLoan = monthlySalary * 200;
+            if (loanAmount > maxLoan) {
+                alert(`ไม่อนุมัติวงเงิน! วงเงินกู้สูงสุดของคุณคือ ${maxLoan.toLocaleString()} บาท\n(คำนวณจาก 200 เท่าของเงินเดือน)`);
+                return; 
+            }
+
+            let monthlyPayment = (loanAmount * interestRate * Math.pow(1 + interestRate, months)) / (Math.pow(1 + interestRate, months) - 1);
+
+            if (isNaN(monthlyPayment) || !isFinite(monthlyPayment)) {
+                monthlyPayment = loanAmount / months;
+            }
+            document.getElementById("resultContainer").classList.remove("hidden");
+
+        
+            let totalPaid = monthlyPayment * months;
+            let totalInterest = totalPaid - loanAmount;
+            document.getElementById("summaryResult").innerHTML = `
+                <h3 class="text-xl font-bold text-blue-800 mb-3">สรุปสินเชื่อบ้าน</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p><span class="font-semibold">วงเงินกู้:</span> ${loanAmount.toLocaleString(undefined, {minimumFractionDigits: 2})} บาท</p>
+                        <p><span class="font-semibold">อัตราดอกเบี้ย:</span> ${annualInterestRate.toFixed(2)}% ต่อปี</p>
+                        <p><span class="font-semibold">ระยะเวลาผ่อน:</span> ${years} ปี (${months} งวด)</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-blue-600 border-b border-blue-200 pb-2 mb-2">ผ่อนเดือนละ: ${monthlyPayment.toLocaleString(undefined, {minimumFractionDigits: 2})} บาท</p>
+                        <p class="text-sm"><span class="font-semibold text-gray-600">รวมชำระทั้งสิ้น:</span> ${totalPaid.toLocaleString(undefined, {minimumFractionDigits: 2})} บาท</p>
+                        <p class="text-sm"><span class="font-semibold text-red-500">ดอกเบี้ยรวม:</span> ${totalInterest.toLocaleString(undefined, {minimumFractionDigits: 2})} บาท</p>
+                    </div>
+                </div>
+            `;
+
+            let tableHTML = "";
+            let balance = loanAmount;
+
+            for (let i = 1; i <= months; i++) {
+                let interestPayment = balance * interestRate;
+                let principalPayment = monthlyPayment - interestPayment;
+
+                if (i === months) {
+                    principalPayment = balance;
+                    monthlyPayment = principalPayment + interestPayment;
+                }
+
+      
+                let nextBalance = balance - principalPayment;
+                if (nextBalance < 0.01) nextBalance = 0;
+                let rowBg = i % 2 === 0 ? "bg-gray-50" : "bg-white";
+                tableHTML += `
+                    <tr class="${rowBg} border-b hover:bg-blue-50 transition duration-150">
+                        <td class="px-4 py-2 text-center font-medium">${i}</td>
+                        <td class="px-4 py-2">${balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="px-4 py-2 font-semibold text-blue-600">${monthlyPayment.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="px-4 py-2 text-red-500">${interestPayment.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="px-4 py-2 text-green-600">${principalPayment.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="px-4 py-2 font-bold">${nextBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+                
+                balance = nextBalance;
+            }
+
+            document.getElementById("tableResult").innerHTML = tableHTML;
+        }
+    </script>
+</body>
+</html>

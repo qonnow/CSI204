@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สร้างตัวแปรและแสดงชนิดข้อมูล</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200 w-full max-w-sm">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">ผลลัพธ์การทำงาน:</h2>
+        
+        <div id="output" class="text-gray-700 space-y-2"></div>
+    </div>
+    <script>
+        let studentName = "Tanakit";
+        let studentAge = 999;
+        let isGraduated = false;
+        let scores = [85, 90, 78];
+        let student = { id: "68001234", name: "Tanakit", grade: "A" };
+        
+        
+        console.log("Name:", studentName, "Type:", typeof studentName);
+        console.log("Age:", studentAge, "Type:", typeof studentAge);
+        
+        
+        document.getElementById("output").innerHTML = `
+            <p><span class="font-semibold">Name:</span> ${studentName}</p>
+            <p><span class="font-semibold">Age:</span> ${studentAge}</p>
+            <p class="text-blue-600 font-bold mt-2 pt-2 border-t">
+               Average Grade: ${((scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2))}
+            </p>
+        `;
+    </script>
+</body>
+</html>

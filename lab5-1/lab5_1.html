@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>if-else & Checkbox</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+
+    <div class="max-w-2xl mx-auto space-y-6">
+        
+        <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2 border-b pb-4 text-center">ระบบสั่งซื้อสินค้าไอที</h2>
+            <p class="text-sm text-gray-500 mb-6 text-center">
+                โปรโมชั่น: ซื้อครบ 500 ลด 10% | ซื้อครบ 1,000 ลด 15%
+            </p>
+            
+            <div id="productList" class="space-y-3 mb-6">
+                </div>
+
+            <button onclick="calculateTotal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md">
+                คำนวณราคาสุทธิ
+            </button>
+        </div>
+
+        <div id="resultContainer" class="bg-white p-6 rounded-xl shadow-md border border-gray-200 hidden">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">สรุปยอดสั่งซื้อ</h3>
+            
+            <div class="space-y-3 text-gray-700 text-lg">
+                <div class="flex justify-between">
+                    <span>ราคารวมของที่เลือก:</span>
+                    <span id="displayTotal" class="font-semibold">0 บาท</span>
+                </div>
+                <div class="flex justify-between text-red-500">
+                    <span id="displayDiscountText">ส่วนลด (0%):</span>
+                    <span id="displayDiscountAmount" class="font-semibold">- 0 บาท</span>
+                </div>
+                <div class="flex justify-between pt-4 border-t-2 border-gray-800 text-xl font-bold text-blue-700">
+                    <span>ยอดสุทธิที่ต้องชำระ:</span>
+                    <span id="displayNetTotal">0 บาท</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        const products = [
+            { id: "p1", name: "เมาส์ไร้สาย (Wireless Mouse)", price: 350 },
+            { id: "p2", name: "คีย์บอร์ดแมคคานิคอล (Mechanical Keyboard)", price: 890 },
+            { id: "p3", name: "หูฟังเกมมิ่ง (Gaming Headset)", price: 1200 },
+            { id: "p4", name: "แผ่นรองเมาส์ (Mousepad)", price: 150 },
+            { id: "p5", name: "แฟลชไดร์ฟ (USB Flash Drive 64GB)", price: 250 }
+        ];
+
+        // ฟังก์ชันสร้างรายการสินค้าเมื่อโหลดหน้าเว็บ
+        function renderProducts() {
+            const container = document.getElementById('productList');
+            let html = '';
+  
+            products.forEach(product => {
+                html += `
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer transition">
+                        <input type="checkbox" name="productItems" value="${product.price}" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="ml-3 flex-1 text-gray-800">${product.name}</span>
+                        <span class="font-bold text-blue-600">${product.price} ฿</span>
+                    </label>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // 4. ฟังก์ชันคำนวณราคารวม
+        function calculateTotal() {
+      
+            const checkboxes = document.querySelectorAll('input[name="productItems"]:checked');
+            let total = 0;
+
+  
+            checkboxes.forEach(box => {
+                total += parseFloat(box.value);
+            });
+
+            let discountPercent = 0;
+
+            
+            if (total > 1000) {
+                discountPercent = 15;
+            } else if (total > 500) {
+                discountPercent = 10;
+            } else {
+                discountPercent = 0; // ไม่ถึง 500 ไม่ได้ลด
+            }
+
+           
+            let discountAmount = (total * discountPercent) / 100;
+            let netTotal = total - discountAmount;
+
+            document.getElementById('resultContainer').classList.remove('hidden');
+
+
+            document.getElementById('displayTotal').innerText = `${total.toLocaleString()} บาท`;
+            document.getElementById('displayDiscountText').innerText = `ส่วนลด (${discountPercent}%):`;
+            document.getElementById('displayDiscountAmount').innerText = `- ${discountAmount.toLocaleString()} บาท`;
+            document.getElementById('displayNetTotal').innerText = `${netTotal.toLocaleString()} บาท`;
+        }
+
+        window.onload = renderProducts;
+    </script>
+</body>
+</html>

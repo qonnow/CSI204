@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การกรองข้อมูลด้วยหลายเงื่อนไข</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+
+    <div class="max-w-5xl mx-auto space-y-6">
+        
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h2 class="text-2xl font-bold text-gray-800">รายการสินค้าทั้งหมด</h2>
+            
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <label for="categoryFilter" class="font-medium text-gray-700 whitespace-nowrap">หมวดหมู่:</label>
+                <select id="categoryFilter" onchange="filterProducts()" class="w-full sm:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                    <option value="ทั้งหมด">ทั้งหมด (All)</option>
+                    <option value="เสื้อผ้า">เสื้อผ้า (Clothing)</option>
+                    <option value="อุปกรณ์">อุปกรณ์ (Equipment)</option>
+                    <option value="อาหาร">อาหาร (Food)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="productContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+
+    </div>
+
+    <script>
+  
+        const products = [
+            { name: "เสื้อยืดคอกลม", category: "เสื้อผ้า", price: 250, stock: 15 },
+            { name: "กางเกงยีนส์", category: "เสื้อผ้า", price: 890, stock: 5 },
+            { name: "แจ็คเก็ตกันหนาว", category: "เสื้อผ้า", price: 1200, stock: 0 }, 
+            { name: "เต็นท์โดม 2 คน", category: "อุปกรณ์", price: 1500, stock: 8 },
+            { name: "ไฟฉาย LED", category: "อุปกรณ์", price: 350, stock: 20 },
+            { name: "กระติกน้ำสูญญากาศ", category: "อุปกรณ์", price: 450, stock: 12 },
+            { name: "อาหารแห้งเซ็ต A", category: "อาหาร", price: 199, stock: 30 },
+            { name: "โปรตีนแท่ง (Energy Bar)", category: "อาหาร", price: 45, stock: 50 },
+            { name: "น้ำดื่ม 1.5 ลิตร", category: "อาหาร", price: 15, stock: 100 }
+        ];
+
+        function renderProducts(itemsToDisplay) {
+            const container = document.getElementById('productContainer');
+            let html = '';
+
+            if (itemsToDisplay.length === 0) {
+                container.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">ไม่พบสินค้าในหมวดหมู่นี้</p>`;
+                return;
+            }
+
+            itemsToDisplay.forEach(product => {
+                let stockStatus = product.stock > 0 
+                    ? `<span class="text-green-600 font-medium">มีสินค้า (${product.stock} ชิ้น)</span>` 
+                    : `<span class="text-red-500 font-bold">สินค้าหมด</span>`;
+
+                html += `
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition duration-200 flex flex-col justify-between h-full">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-bold text-gray-800">${product.name}</h3>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-semibold">${product.category}</span>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-900 my-4">฿${product.price.toLocaleString()}</p>
+                        </div>
+                        <div class="pt-4 border-t border-gray-100 text-sm">
+                            สถานะ: ${stockStatus}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function filterProducts() {
+            let selectedCategory = document.getElementById('categoryFilter').value;
+            let filteredProducts = products.filter(product => {
+                // ใช้ if-else if ในการเช็คเงื่อนไขตามที่โจทย์ระบุ
+                if (selectedCategory === "ทั้งหมด") {
+                    return true; // ถ้าเลือกทั้งหมด ให้ผ่านเข้ารอบทุกชิ้น
+                } else if (product.category === selectedCategory) {
+                    return true; // ถ้าหมวดหมู่ของสินค้า ตรงกับตัวที่เลือก ให้ผ่านเข้ารอบ
+                } else {
+                    return false; // ไม่ตรงเงื่อนไขใดเลย ให้คัดทิ้ง
+                }
+            });
+            renderProducts(filteredProducts);
+        }
+        window.onload = () => {
+            renderProducts(products);
+        };
+    </script>
+</body>
+</html>

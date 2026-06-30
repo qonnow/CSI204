@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การใช้ JSON และการแปลงข้อมูลที่สามารถใช้ Array Methods ของ JavaScript ร่วมกับ JSON</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+
+    <div class="max-w-3xl mx-auto space-y-6">
+        
+        <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4 text-center">ระบบจัดการข้อมูลสินค้า (JSON & Array Methods)</h2>
+            
+            <div class="flex flex-col sm:flex-row gap-4 mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">อัปโหลดไฟล์ JSON (Import)</label>
+                    <input type="file" id="fileInput" accept=".json" onchange="importJSON(event)" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                </div>
+                <div class="flex-1 flex items-end">
+                    <button onclick="exportJSON()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 shadow-sm flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        ดาวน์โหลด JSON (Export)
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-6 text-gray-700">
+                
+                <div>
+                    <h3 class="font-bold text-lg text-blue-700 mb-2">รายการสินค้าทั้งหมด (ใช้ forEach)</h3>
+                    <ul id="productList" class="list-disc pl-5 space-y-1 bg-white p-4 border rounded-lg">
+                        </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-lg text-purple-700 mb-2">รายชื่อสินค้า (ใช้ map)</h3>
+                    <p id="productNames" class="bg-purple-50 p-3 rounded-lg border border-purple-100"></p>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-lg text-orange-700 mb-2">สินค้าที่ราคามากกว่า 1,000 บาท (ใช้ filter)</h3>
+                    <ul id="expensiveProducts" class="list-disc pl-5 space-y-1 bg-orange-50 p-4 rounded-lg border border-orange-100"></ul>
+                </div>
+
+                <div class="flex justify-between items-center bg-gray-800 text-white p-4 rounded-lg text-xl">
+                    <span class="font-bold">มูลค่าสินค้ารวมทั้งหมด (ใช้ reduce):</span>
+                    <span id="totalValue" class="font-bold text-green-400">0 บาท</span>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+       
+        let products = [
+            { id: 1, name: "Watch", price: 3000 },
+            { id: 2, name: "Bag", price: 1200 },
+            { id: 3, name: "Shoes", price: 2500 },
+            { id: 4, name: "Hat", price: 500 }
+        ];
+
+        // ฟังก์ชันหลักสำหรับอัปเดตหน้าจอ
+        function updateUI() {
+
+            let listHtml = "";
+            products.forEach(item => {
+                listHtml += `<li><strong>${item.name}</strong> - ราคา: ${item.price.toLocaleString()} บาท</li>`;
+            });
+            document.getElementById("productList").innerHTML = listHtml;
+            let namesArray = products.map(item => item.name);
+            document.getElementById("productNames").innerText = namesArray.join(", ");
+            let expensiveItems = products.filter(item => item.price >= 1000);
+            let expensiveHtml = "";
+            expensiveItems.forEach(item => {
+                expensiveHtml += `<li>${item.name} (${item.price.toLocaleString()} บาท)</li>`;
+            });
+            document.getElementById("expensiveProducts").innerHTML = expensiveHtml || "<li>ไม่มีสินค้าที่ตรงเงื่อนไข</li>";
+            let total = products.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById("totalValue").innerText = `${total.toLocaleString()} บาท`;
+        }
+
+        // ==========================================
+        // ระบบส่งออก / นำเข้า ข้อมูล JSON
+        // ==========================================
+
+        // ฟังก์ชันส่งออก (Export)
+        function exportJSON() {
+            // 2. แปลง Object เป็น JSON string ด้วย JSON.stringify()
+            const jsonString = JSON.stringify(products, null, 2);
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "products_data.json"; 
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ฟังก์ชันนำเข้า (Import)
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        products = importedData; 
+                        updateUI(); 
+                        alert("อัปโหลดข้อมูล JSON สำเร็จ!");
+                    } else {
+                        alert("รูปแบบไฟล์ JSON ไม่ถูกต้อง (ต้องเป็น Array)");
+                    }
+                } catch (error) {
+                    alert("เกิดข้อผิดพลาดในการอ่านไฟล์ JSON: โปรดตรวจสอบโครงสร้างไฟล์");
+                }
+   
+                event.target.value = ""; 
+            };
+            
+            reader.readAsText(file); 
+        }
+
+
+        window.onload = updateUI;
+    </script>
+</body>
+</html>
